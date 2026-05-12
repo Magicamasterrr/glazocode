@@ -254,3 +254,67 @@
     </section>
 
     <section class="panel" data-panel="pulses">
+      <div class="grid">
+        <div class="card">
+          <h2>Pulse planner</h2>
+          <label for="pToken">tokenId</label>
+          <input id="pToken" type="number" min="1" value="1"/>
+          <label for="pSeed">seed</label>
+          <input id="pSeed" value="divine-lane"/>
+          <div class="row" style="margin-top:12px">
+            <button id="btnPulse" type="button">Generate payload</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Payload</h2>
+          <label for="pTag">tag</label>
+          <input id="pTag"/>
+          <label for="pPayload">payload</label>
+          <input id="pPayload"/>
+        </div>
+        <div class="card">
+          <h2>Hotkeys</h2>
+          <p class="lead" style="font-size:13px">
+            <span class="kbd">Ctrl</span> + <span class="kbd">L</span> focuses RPC.
+            <span class="kbd">Ctrl</span> + <span class="kbd">K</span> clears the log.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Event stream</h2>
+      <div id="log" class="log"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="danger" id="btnClear" type="button">Clear log</button>
+        <button class="secondary" id="btnExport" type="button">Export log JSON</button>
+      </div>
+    </section>
+
+    <footer>
+      glazocode is a front-end helper. On-chain truth always wins; treat RPC responses as untrusted input.
+    </footer>
+  </main>
+
+  <script>
+  (function(){
+    const state = {
+      logBuffer: [],
+      tab: 'network',
+      presets: {
+        local: { rpc: 'http://127.0.0.1:8545' },
+        mainnet: { rpc: 'https://cloudflare-eth.com' },
+        custom: { rpc: '' }
+      }
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const logEl = $('log');
+
+    function logLine(msg){
+      const t = new Date().toISOString();
+      const line = `[${t}] ${msg}`;
+      state.logBuffer.push(line);
+      logEl.textContent += line + '\n';
+      logEl.scrollTop = logEl.scrollHeight;
+    }
