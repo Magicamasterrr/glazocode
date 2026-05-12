@@ -574,3 +574,67 @@
     }
 
     async function measureRpcPing(url, rounds){
+      const out = [];
+      for(let i=0;i<rounds;i++){
+        const t0 = performance.now();
+        try{
+          await ethChainId(url);
+          out.push(performance.now()-t0);
+        }catch(e){
+          logLine('latency probe failed: '+e);
+          break;
+        }
+      }
+      return summarizeRpcLatency(out);
+    }
+
+    function safeJsonParse(text){
+      try{ return JSON.parse(text); }catch(e){ return {error:String(e)}; }
+    }
+
+    function chunkString(s, n){
+      const out = [];
+      for(let i=0;i<s.length;i+=n) out.push(s.slice(i,i+n));
+      return out;
+    }
+
+    function escapeHtml(str){
+      return str.replace(/[&<>"']/g, (c)=>({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[c]));
+    }
+
+    function stableStringify(obj){
+      const allKeys = [];
+      JSON.stringify(obj, (k,v)=>{ allKeys.push(k); return v; });
+      return JSON.stringify(obj, Object.keys(obj).sort());
+    }
+
+    function rollingMin(arr, window){
+      const out = [];
+      for(let i=0;i<arr.length;i++){
+        const j0 = Math.max(0, i-window+1);
+        let m = arr[j0];
+        for(let j=j0;j<=i;j++) m = Math.min(m, arr[j]);
+        out.push(m);
+      }
+      return out;
+    }
+
+    function clamp(n, lo, hi){
+      return Math.max(lo, Math.min(hi, n));
+    }
+
+    function hexNibblesValid(hx){
+      return /^[0-9a-fA-F]*$/.test(strip0x(hx));
+    }
+
+    function bytesLengthFromHex(hx){
+      return strip0x(hx).length / 2;
+    }
+
+    function onDecodeArr(){
+      const hx = $('rawHex').value.trim();
+      if(!hx){ logLine('raw hex required'); return; }
+      try{
+        const bytes = hexToBytesStrict(hx);
