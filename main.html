@@ -510,3 +510,67 @@
     }
 
     function strip0x(hx){
+      return hx.trim().replace(/^0x/i,'');
+    }
+
+    function readWord(mem, wordIndex){
+      const off = wordIndex * 32;
+      const slice = mem.subarray(off, off+32);
+      let v = 0n;
+      for(let i=0;i<32;i++){
+        v = (v << 8n) + BigInt(slice[i]);
+      }
+      return v;
+    }
+
+    function decodeUint256ArrayFromAbiBytes(bytes){
+      if(bytes.length < 32) throw new Error('too short');
+      const offsetBytes = Number(readWord(bytes, 0));
+      if(offsetBytes % 32 !== 0) throw new Error('bad offset');
+      const startWord = offsetBytes / 32;
+      if(startWord >= bytes.length / 32) throw new Error('offset range');
+      const len = Number(readWord(bytes, startWord));
+      const firstElWord = startWord + 1;
+      const needWords = firstElWord + len;
+      if(needWords > bytes.length / 32) throw new Error('bad length');
+      const out = [];
+      for(let i=0;i<len;i++){
+        out.push(readWord(bytes, firstElWord + i).toString(10));
+      }
+      return {length: len, values: out};
+    }
+
+    function hexToBytesStrict(hx){
+      const h = strip0x(hx);
+      if(h.length % 2) throw new Error('odd hex');
+      return hexToBytes('0x'+h);
+    }
+
+    function decodeBytes32Hex(hx){
+      const b = hexToBytesStrict(hx);
+      if(b.length !== 32) throw new Error('need 32 bytes');
+      return '0x' + Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('');
+    }
+
+    function formatEthFromWei(weiStr){
+      const w = BigInt(weiStr);
+      const whole = w / 10n**18n;
+      const frac = w % 10n**18n;
+      const fracStr = frac.toString().padStart(18,'0').replace(/0+$/,'');
+      return fracStr ? `${whole.toString()}.${fracStr}` : whole.toString();
+    }
+
+    function toGwei(weiStr){
+      const w = BigInt(weiStr);
+      return (w / 10n**9n).toString();
+    }
+
+    function summarizeRpcLatency(samples){
+      if(!samples.length) return null;
+      const sorted = samples.slice().sort((a,b)=>a-b);
+      const mid = sorted[Math.floor(sorted.length/2)];
+      const p90 = sorted[Math.floor(sorted.length*0.9)-1];
+      return {median_ms: mid, p90_ms: p90, n: samples.length};
+    }
+
+    async function measureRpcPing(url, rounds){
