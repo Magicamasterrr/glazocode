@@ -766,3 +766,59 @@
     }
 
     function wire(){
+      $('btnPing').addEventListener('click', onPing);
+      $('btnBench').addEventListener('click', onBench);
+      $('btnBlock').addEventListener('click', onBlock);
+      $('btnSaveNet').addEventListener('click', saveNetwork);
+      $('btnClear').addEventListener('click', ()=>{ logEl.textContent=''; state.logBuffer=[]; });
+      $('btnExport').addEventListener('click', exportLog);
+      $('btnSlice').addEventListener('click', onSlice);
+      $('btnCallHash').addEventListener('click', onCallHash);
+      $('btnPackStruct').addEventListener('click', onPackStructLocal);
+      $('btnPulse').addEventListener('click', onPulse);
+      $('btnApplyPreset').addEventListener('click', applyPreset);
+      $('btnClearStorage').addEventListener('click', clearStorage);
+      $('btnSaveNotes').addEventListener('click', ()=>{
+        localStorage.setItem(storageKey('notes'), $('notes').value);
+        logLine('notes saved');
+      });
+      $('btnCopyDigest').addEventListener('click', async ()=>{
+        const t = $('outDigest').value.trim();
+        if(!t){ logLine('nothing to copy'); return; }
+        await navigator.clipboard.writeText(t);
+        logLine('copied digest');
+      });
+      $('btnDecodeArr').addEventListener('click', onDecodeArr);
+      $('btnDecodeHash').addEventListener('click', onDecodeHash);
+      $('btnWeiConvert').addEventListener('click', onWeiConvert);
+      window.addEventListener('keydown', (ev)=>{
+        if(ev.ctrlKey && ev.key.toLowerCase()==='l'){
+          ev.preventDefault();
+          $('rpc').focus();
+        }
+        if(ev.ctrlKey && ev.key.toLowerCase()==='k'){
+          ev.preventDefault();
+          logEl.textContent='';
+          state.logBuffer=[];
+        }
+      });
+    }
+
+    function selfTests(){
+      const a = leftPadHex32('0x90A7F8182664F6ddC35E0709886f24a1B7BA99b9');
+      if(a.length !== 66) throw new Error('pad');
+      if(SELECTORS.hashOrder.length !== 4) throw new Error('sel');
+      if(bytesLengthFromHex(bytesToHex(SELECTORS.hashOrder)) !== 4) throw new Error('sel2');
+      return true;
+    }
+
+    buildTabs();
+    wire();
+    loadNetwork();
+    activateTab('network');
+    try{ selfTests(); logLine('selfTests ok'); }catch(e){ logLine('selfTests failed '+e); }
+    logLine('glazocode ready');
+  })();
+  </script>
+</body>
+</html>
