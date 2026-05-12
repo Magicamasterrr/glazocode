@@ -638,3 +638,67 @@
       if(!hx){ logLine('raw hex required'); return; }
       try{
         const bytes = hexToBytesStrict(hx);
+        const dec = decodeUint256ArrayFromAbiBytes(bytes);
+        $('decodedOut').value = JSON.stringify(dec, null, 2);
+        logLine('decoded array len='+dec.length);
+      }catch(e){
+        logLine('decode failed: '+e);
+      }
+    }
+
+    function onDecodeHash(){
+      const hx = $('rawHex').value.trim();
+      try{
+        const out = decodeBytes32Hex(hx);
+        $('decodedOut').value = out;
+        logLine('bytes32 normalized');
+      }catch(e){
+        logLine('bytes32 decode failed: '+e);
+      }
+    }
+
+    function onWeiConvert(){
+      const w = ($('weiIn').value || '0').trim();
+      try{
+        const eth = formatEthFromWei(w);
+        const gwei = toGwei(w);
+        $('ethOut').textContent = eth;
+        $('gweiOut').textContent = gwei;
+        logLine('wei converted');
+      }catch(e){
+        logLine('wei convert failed: '+e);
+      }
+    }
+
+    async function onPing(){
+      const url = $('rpc').value.trim();
+      if(!url){ logLine('RPC required'); return; }
+      try{
+        const cid = await ethChainId(url);
+        $('statChain').textContent = cid.toString();
+        logLine('chainId='+cid.toString());
+      }catch(e){
+        logLine('ping failed: '+e);
+      }
+    }
+
+    async function onBench(){
+      const url = $('rpc').value.trim();
+      if(!url){ logLine('RPC required'); return; }
+      const stats = await measureRpcPing(url, 7);
+      logLine('latency '+JSON.stringify(stats));
+    }
+
+    async function onBlock(){
+      const url = $('rpc').value.trim();
+      if(!url){ logLine('RPC required'); return; }
+      try{
+        const bn = await ethBlockNumber(url);
+        $('statBlock').textContent = bn.toString();
+        logLine('block='+bn.toString());
+      }catch(e){
+        logLine('block failed: '+e);
+      }
+    }
+
+    async function onSlice(){
