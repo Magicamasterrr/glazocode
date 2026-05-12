@@ -126,3 +126,67 @@
       </div>
     </div>
   </header>
+
+  <main class="wrap">
+    <div class="tabs" id="tabs"></div>
+
+    <section class="panel active" data-panel="network">
+      <div class="grid">
+        <div class="card">
+          <h2>Network</h2>
+          <label for="rpc">RPC URL</label>
+          <input id="rpc" placeholder="https://… or http://127.0.0.1:8545"/>
+          <label for="contract">Contract</label>
+          <input id="contract" placeholder="0x… TheDivineNFT"/>
+          <div class="row" style="margin-top:12px">
+            <button id="btnPing" type="button">Ping chain</button>
+            <button class="secondary" id="btnBlock" type="button">Latest block</button>
+            <button class="ghost" id="btnSaveNet" type="button">Save to storage</button>
+            <button class="ghost" id="btnBench" type="button">Bench latency</button>
+          </div>
+          <div class="stat"><span>chainId</span><b id="statChain">—</b></div>
+          <div class="stat"><span>block</span><b id="statBlock">—</b></div>
+        </div>
+
+        <div class="card">
+          <h2>Inventory slice (view)</h2>
+          <label for="sliceStart">start</label>
+          <input id="sliceStart" type="number" min="0" value="0"/>
+          <label for="sliceCount">count (max 64)</label>
+          <input id="sliceCount" type="number" min="1" max="64" value="8"/>
+          <div class="row" style="margin-top:12px">
+            <button id="btnSlice" type="button">eth_call exportInventorySlice</button>
+          </div>
+          <p class="lead" style="margin-top:10px;font-size:12px">
+            Uses a minimal selector encoder. If your RPC rejects large responses, lower the count.
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>Quick presets</h2>
+          <label for="preset">Preset</label>
+          <select id="preset">
+            <option value="local">Local dev (8545)</option>
+            <option value="mainnet">Ethereum mainnet (public RPC placeholder)</option>
+            <option value="custom">Custom (use fields)</option>
+          </select>
+          <div class="row" style="margin-top:12px">
+            <button class="secondary" id="btnApplyPreset" type="button">Apply preset</button>
+            <button class="ghost" id="btnClearStorage" type="button">Clear storage</button>
+          </div>
+          <p class="lead" style="margin-top:10px;font-size:12px">
+            Presets only fill the RPC field. You must supply a real contract address for calls.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="orders">
+      <div class="grid">
+        <div class="card">
+          <h2>Sanctified order sketch</h2>
+          <label for="oToken">tokenId</label>
+          <input id="oToken" type="number" min="1" value="1"/>
+          <label for="oPrice">priceWei</label>
+          <input id="oPrice" type="text" value="100000000000000000"/>
+          <label for="oNonce">nonce</label>
