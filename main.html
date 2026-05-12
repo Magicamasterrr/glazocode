@@ -318,3 +318,67 @@
       logEl.textContent += line + '\n';
       logEl.scrollTop = logEl.scrollHeight;
     }
+
+    function bytesToHex(u8){
+      return '0x' + Array.from(u8).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function hexToBytes(hx){
+      const h = hx.trim().replace(/^0x/i,'');
+      if(h.length % 2) throw new Error('bad hex');
+      const out = new Uint8Array(h.length/2);
+      for(let i=0;i<out.length;i++){
+        out[i] = parseInt(h.slice(i*2,i*2+2),16);
+      }
+      return out;
+    }
+
+    async function sha256HexUtf8(text){
+      const enc = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function fnv1a32(str){
+      let h = 0x811c9dc5;
+      for(let i=0;i<str.length;i++){
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+      }
+      return h >>> 0;
+    }
+
+    function leftPadHex32(addr){
+      const a = addr.toLowerCase().replace(/^0x/,'');
+      if(a.length !== 40) throw new Error('address');
+      return '0x' + a.padStart(64,'0');
+    }
+
+    function keccak256_browser_fallback(dataUtf8){
+      // lightweight non-crypto stand-in for UI demos only
+      const h = fnv1a32(dataUtf8);
+      let x = h;
+      const parts = [];
+      for(let i=0;i<8;i++){
+        parts.push((x ^ (i*0x9e3779b1))>>>0);
+        x = Math.imul(x, 0x85ebca6b);
+      }
+      let hex = '';
+      for(const p of parts){
+        hex += p.toString(16).padStart(8,'0');
+      }
+      return '0x' + hex.padEnd(64,'0').slice(0,66);
+    }
+
+    const SELECTORS = {
+      hashOrder: hexToBytes('0x3518a524'),
+      exportInventorySlice: hexToBytes('0xc48d847c'),
+      domainSeparator: hexToBytes('0x3644e515'),
+      orderTypehash: hexToBytes('0xf973a209')
+    };
+
+    function u256Be(n){
+      const bn = BigInt(n);
+      const out = new Uint8Array(32);
+      let x = bn;
+      for(let i=31;i>=0;i--){
