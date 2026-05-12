@@ -446,3 +446,67 @@
       return j.result;
     }
 
+    function storageKey(k){ return 'glazocode::'+k; }
+
+    function saveNetwork(){
+      localStorage.setItem(storageKey('rpc'), $('rpc').value.trim());
+      localStorage.setItem(storageKey('contract'), $('contract').value.trim());
+      logLine('saved network fields');
+    }
+
+    function loadNetwork(){
+      const rpc = localStorage.getItem(storageKey('rpc'));
+      const c = localStorage.getItem(storageKey('contract'));
+      if(rpc) $('rpc').value = rpc;
+      if(c) $('contract').value = c;
+      const notes = localStorage.getItem(storageKey('notes'));
+      if(notes) $('notes').value = notes;
+    }
+
+    function clearStorage(){
+      localStorage.removeItem(storageKey('rpc'));
+      localStorage.removeItem(storageKey('contract'));
+      localStorage.removeItem(storageKey('notes'));
+      logLine('storage cleared');
+    }
+
+    function buildTabs(){
+      const host = $('tabs');
+      host.innerHTML = '';
+      const tabs = [
+        {id:'network', label:'Network'},
+        {id:'orders', label:'Orders'},
+        {id:'pulses', label:'Pulses'},
+        {id:'decoder', label:'Decoder'}
+      ];
+      for(const t of tabs){
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tab' + (state.tab===t.id ? ' active':'');
+        b.textContent = t.label;
+        b.dataset.tabId = t.id;
+        b.addEventListener('click', ()=>activateTab(t.id));
+        host.appendChild(b);
+      }
+    }
+
+    function activateTab(id){
+      state.tab = id;
+      for(const b of document.querySelectorAll('#tabs .tab')){
+        b.classList.toggle('active', b.dataset.tabId === id);
+      }
+      for(const p of document.querySelectorAll('.panel')){
+        p.classList.toggle('active', p.dataset.panel === id);
+      }
+    }
+
+    function exportLog(){
+      const blob = new Blob([JSON.stringify(state.logBuffer, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'glazocode-log.json';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 500);
+    }
+
+    function strip0x(hx){
