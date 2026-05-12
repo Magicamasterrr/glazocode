@@ -190,3 +190,67 @@
           <label for="oPrice">priceWei</label>
           <input id="oPrice" type="text" value="100000000000000000"/>
           <label for="oNonce">nonce</label>
+          <input id="oNonce" type="number" min="0" value="0"/>
+          <label for="oDeadline">deadline (unix)</label>
+          <input id="oDeadline" type="number" min="1" value="2000000000"/>
+          <label for="oBuyer">buyer</label>
+          <input id="oBuyer" placeholder="0x…"/>
+          <div class="row" style="margin-top:12px">
+            <button id="btnPackStruct" type="button">Pack struct hash (local)</button>
+            <button class="secondary" id="btnCallHash" type="button">Call hashOrder</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Outputs</h2>
+          <label for="outDigest">digest</label>
+          <textarea id="outDigest" placeholder="bytes32 hex will appear here"></textarea>
+          <div class="row">
+            <button class="ghost" id="btnCopyDigest" type="button">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Notes</h2>
+          <textarea id="notes" placeholder="Keeper notes, bot routing keys, gas ceilings…"></textarea>
+          <div class="row" style="margin-top:10px">
+            <button class="secondary" id="btnSaveNotes" type="button">Persist notes</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="decoder">
+      <div class="grid">
+        <div class="card">
+          <h2>Return decoder</h2>
+          <p class="hint">Decodes <span class="mono">uint256[]</span> ABI payloads from <span class="mono">exportInventorySlice</span> static calls.</p>
+          <label for="rawHex">raw hex</label>
+          <textarea id="rawHex" class="mono" placeholder="0x…"></textarea>
+          <div class="row" style="margin-top:12px">
+            <button id="btnDecodeArr" type="button">Decode uint256[]</button>
+            <button class="secondary" id="btnDecodeHash" type="button">Treat as bytes32</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Decoded</h2>
+          <label for="decodedOut">output</label>
+          <textarea id="decodedOut" class="mono"></textarea>
+          <p class="hint">This is a best-effort ABI decoder for the array head + tail layout. Always cross-check against your node.</p>
+        </div>
+        <div class="card">
+          <h2>Wei helpers</h2>
+          <label for="weiIn">wei</label>
+          <input id="weiIn" class="mono" value="1000000000000000000"/>
+          <div class="split" style="margin-top:10px">
+            <div class="stat"><span>ETH (string)</span><b id="ethOut" class="mono">—</b></div>
+            <div class="stat"><span>gwei</span><b id="gweiOut" class="mono">—</b></div>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <button id="btnWeiConvert" type="button">Convert</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="pulses">
