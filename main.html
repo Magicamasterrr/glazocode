@@ -702,3 +702,67 @@
     }
 
     async function onSlice(){
+      const url = $('rpc').value.trim();
+      const to = $('contract').value.trim();
+      if(!url || !to){ logLine('RPC and contract required'); return; }
+      const start = BigInt($('sliceStart').value || '0');
+      const count = BigInt($('sliceCount').value || '1');
+      try{
+        const data = encodeExportSliceCall(start, count);
+        const res = await ethCall(url, to, data);
+        logLine('exportInventorySlice raw: '+res);
+      }catch(e){
+        logLine('slice call failed: '+e);
+      }
+    }
+
+    async function onCallHash(){
+      const url = $('rpc').value.trim();
+      const to = $('contract').value.trim();
+      if(!url || !to){ logLine('RPC and contract required'); return; }
+      const tokenId = BigInt($('oToken').value || '0');
+      const priceWei = BigInt($('oPrice').value || '0');
+      const nonce = BigInt($('oNonce').value || '0');
+      const deadline = BigInt($('oDeadline').value || '0');
+      const buyer = $('oBuyer').value.trim();
+      try{
+        const data = encodeHashOrderCall(tokenId, priceWei, nonce, deadline, buyer);
+        const res = await ethCall(url, to, data);
+        $('outDigest').value = res;
+        logLine('hashOrder -> '+res);
+      }catch(e){
+        logLine('hashOrder failed: '+e);
+      }
+    }
+
+    async function onPackStructLocal(){
+      const tokenId = $('oToken').value;
+      const priceWei = $('oPrice').value;
+      const nonce = $('oNonce').value;
+      const deadline = $('oDeadline').value;
+      const buyer = $('oBuyer').value.trim();
+      const blob = [tokenId,priceWei,nonce,deadline,buyer].join('|');
+      const hx = await sha256HexUtf8('struct-sketch::'+blob);
+      const synthetic = '0x' + hx;
+      $('outDigest').value = synthetic;
+      logLine('local sketch digest '+synthetic+' (not on-chain keccak)');
+    }
+
+    async function onPulse(){
+      const id = $('pToken').value || '1';
+      const seed = $('pSeed').value || 'divine-lane';
+      const tag = await sha256HexUtf8(`${seed}:${id}`);
+      const payload = keccak256_browser_fallback(`pulse:${id}:${Date.now()}:${seed}`);
+      $('pTag').value = '0x'+tag;
+      $('pPayload').value = payload;
+      logLine('pulse planned for token '+id);
+    }
+
+    function applyPreset(){
+      const key = $('preset').value;
+      const p = state.presets[key];
+      if(p && p.rpc) $('rpc').value = p.rpc;
+      logLine('preset applied: '+key);
+    }
+
+    function wire(){
